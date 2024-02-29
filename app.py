@@ -4,6 +4,7 @@ from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 import bcrypt
+from bson.objectid import ObjectId
 
 ###############################################
 # MONGO AND FLASK SETUP
@@ -123,7 +124,17 @@ def login():
 @app.route("/profile")
 @flask_login.login_required
 def profile():
-    return f"<p>Logged in as: {flask_login.current_user.id}</p><br><a href='/'>Home</a><br><a href='/logout'>Logout</a>"
+    s = ""
+    user = db.users.find_one({"username": flask_login.current_user.id})
+    if "createdRecipes" in user:
+        for recipe in user["createdRecipes"]:
+            recipe = db.testrecipes.find_one({"_id": recipe})
+            s += f"{recipe['recipeName']}<br>"
+    return f"""
+    <p>Logged in as: {flask_login.current_user.id}</p><br>
+    <p>Created Recipes:<br>{s}</p>
+    <a href='/'>Home</a><br><a href='/logout'>Logout</a>
+    """
 
 @app.route('/logout')
 @flask_login.login_required
@@ -159,7 +170,17 @@ def test_form():
         ingredient = request.form['ingredient']
         doc = {
             "recipeName": recipeName,
-            "ingredient": ingredient
+            "ingredient": ingredient,
+            "createdBy": flask_login.current_user.id
         }
         mongoid = db.testrecipes.insert_one(doc)
-        return f"<p>Inserted: {mongoid}</p><br><a href='/recipetest'>View Recipes</a>"
+        if mongoid.acknowledged:
+            mongoid = ObjectId(mongoid.inserted_id)
+            pushResult = db.users.update_one(
+                {"username": flask_login.current_user.id}, 
+                {"$push": {"createdRecipes": mongoid}})
+            if not pushResult.acknowledged or pushResult.modified_count != 1:
+                mongoid = "Failed to insert"
+        else:
+            mongoid = "Failed to insert"
+        return f"<p>Inserted: {mongoid}</p><br><a href='/recipetest'>View Recipes</a><br><a href='/profile'>Profile</a>"
