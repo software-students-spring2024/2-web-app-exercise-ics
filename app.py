@@ -5,6 +5,9 @@ import os
 from dotenv import load_dotenv
 import bcrypt
 
+###############################################
+# MONGO AND FLASK SETUP
+###############################################
 load_dotenv()
 login_manager = flask_login.LoginManager()
 
@@ -12,29 +15,27 @@ client = MongoClient(os.environ.get("MONGO_URI"))
 db = client["testdb"]
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY")
+app.secret_key = os.environ.get("SECRET_KEY") # required for flask login
 login_manager.init_app(app)
 
+###############################################
+# FLASK LOGIN SETUP
+###############################################
 class User(flask_login.UserMixin):
     pass
-
-
 @login_manager.user_loader
 def user_loader(username):
     if not db.users.find_one({"username": username}):
         return
-
     user = User()
     user.id = username
     return user
-
 
 @login_manager.request_loader
 def request_loader(request):
     username = request.form.get('username')
     if not db.users.find_one({"username": username}):
         return
-
     user = User()
     user.id = username
     return user
@@ -43,6 +44,9 @@ def request_loader(request):
 def unauthorized_handler():
     return "<p>You must be logged in.<br><a href='/login'>Login</a></p>", 401
 
+###############################################
+# ROUTES
+###############################################
 @app.route("/")
 def hello():
     return """
@@ -53,6 +57,7 @@ def hello():
     <a href='/signup'>Sign Up</a>
     """
 
+# Hash passwords using bcrypt
 def hash_password(password):
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
