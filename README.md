@@ -4,11 +4,11 @@ A little exercise to build a web application following an agile development proc
 
 ## Product vision statement
 
-See instructions. Delete this line and place the Product Vision Statement here.
+This web app is a platform that allows for users to share their favorite cooking recipes, as well as comment on and rate others' recipes.
 
 ## User stories
 
-See instructions. Delete this line and place a link to the user stories here.
+User stories can be seen in the [Issues](https://github.com/software-students-spring2024/2-web-app-exercise-ics/issues) tab
 
 ## Task boards
 
