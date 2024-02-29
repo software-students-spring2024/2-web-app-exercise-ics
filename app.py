@@ -159,18 +159,23 @@ def test_form():
         return """
         <form action="/testform" method="post">
             <label for="name">Name:</label><br>
-            <input type="text" id="recipeName" name="recipeName" autocomplete="off"><br>
-            <label for="ingredient">Ingredient:</label><br>
-            <input type="text" id="ingredient" name="ingredient" autocomplete="off"><br>
+            <input type="text" id="recipeName" name="recipeName" autocomplete="off" required><br>
+            <label for="ingredient">Ingredients:</label><br>
+            <textarea id="ingredients" name="ingredients" autocomplete="off" rows="5" cols="50" placeholder="Add each ingredient on a new line" required></textarea><br>
+            <label for="directions">Directions:</label><br>
+            <textarea id="directions" name="directions" autocomplete="off" rows="5" cols="50" required></textarea><br>
             <input type="submit" value="Submit">
         </form>
         """
     else: # POST
         recipeName = request.form['recipeName']
-        ingredient = request.form['ingredient']
+        ingredients = request.form['ingredients']
+        ingredients = ingredients.split(os.linesep)
+        directions = request.form['directions']
         doc = {
             "recipeName": recipeName,
-            "ingredient": ingredient,
+            "ingredients": ingredients,
+            "directions": directions,
             "createdBy": flask_login.current_user.id
         }
         mongoid = db.testrecipes.insert_one(doc)
