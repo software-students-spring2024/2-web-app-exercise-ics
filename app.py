@@ -1,19 +1,57 @@
 from flask import Flask, redirect, request
+import flask_login
 from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 import bcrypt
 
 load_dotenv()
+login_manager = flask_login.LoginManager()
 
 client = MongoClient(os.environ.get("MONGO_URI"))
 db = client["testdb"]
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY")
+login_manager.init_app(app)
+
+class User(flask_login.UserMixin):
+    pass
+
+
+@login_manager.user_loader
+def user_loader(username):
+    if not db.users.find_one({"username": username}):
+        return
+
+    user = User()
+    user.id = username
+    return user
+
+
+@login_manager.request_loader
+def request_loader(request):
+    username = request.form.get('username')
+    if not db.users.find_one({"username": username}):
+        return
+
+    user = User()
+    user.id = username
+    return user
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return "<p>You must be logged in.<br><a href='/login'>Login</a></p>", 401
 
 @app.route("/")
 def hello():
-    return "<p>Hello World!</p><br><a href='/testform'>Test Form</a>"
+    return """
+    <p>Hello World!</p><br>
+    <a href='/recipetest'>View recipes</a><br>
+    <a href='/testform'>Test Form</a><br>
+    <a href='/login'>Login</a><br>
+    <a href='/signup'>Sign Up</a>
+    """
 
 def hash_password(password):
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -70,10 +108,23 @@ def login():
         password = request.form['password']
         user = db.users.find_one({"username": username})
         if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
-            return "<p>Login successful</p>"
+            user = User()
+            user.id = username
+            flask_login.login_user(user)
+            return redirect("/profile")
         else:
             return "<p>Login failed</p>"
         
+@app.route("/profile")
+@flask_login.login_required
+def profile():
+    return f"<p>Logged in as: {flask_login.current_user.id}</p><br><a href='/'>Home</a><br><a href='/logout'>Logout</a>"
+
+@app.route('/logout')
+@flask_login.login_required
+def logout():
+    flask_login.logout_user()
+    return redirect("/")
 
 @app.route("/recipetest")
 def mongo_test():
@@ -86,6 +137,7 @@ def mongo_test():
     return f"<p>{s}</p>"
 
 @app.route("/testform", methods=["GET", "POST"])
+@flask_login.login_required
 def test_form():
     if request.method == 'GET':
         return """
