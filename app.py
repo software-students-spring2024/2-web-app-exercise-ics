@@ -129,7 +129,7 @@ def profile():
     if "createdRecipes" in user:
         for recipe in user["createdRecipes"]:
             recipe = db.testrecipes.find_one({"_id": recipe})
-            s += f"{recipe['recipeName']}<br>"
+            s += f"<a href='/recipe/{recipe['_id']}'>{recipe['recipeName']}</a><br>"
     return f"""
     <p>Logged in as: {flask_login.current_user.id}</p><br>
     <p>Created Recipes:<br>{s}</p>
@@ -151,6 +151,17 @@ def mongo_test():
             s += f"{key}: {doc[key]}<br>"
         s += "<br>"
     return f"<p>{s}</p>"
+
+@app.route("/recipe/<recipeid>")
+def show_recipe(recipeid):
+    recipe = db.testrecipes.find_one({"_id": ObjectId(recipeid)})
+    return f"""
+    <p>Recipe Name: {recipe['recipeName']}</p>
+    <p>Created By: {recipe['createdBy']}</p>
+    <p>Ingredients:<br>{os.linesep.join(recipe['ingredients'])}</p>
+    <p>Directions:<br>{recipe['directions']}</p>
+    """
+    
 
 @app.route("/testform", methods=["GET", "POST"])
 @flask_login.login_required
