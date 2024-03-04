@@ -226,9 +226,11 @@ def delete_recipe():
     if request.method == "GET":
         return render_template("home/recipe/delete-recipe.html", name=name)
     if request.method == "POST":
-        recipeId = request.form.get("id")
+        recipeId = request.args.get("id")
+        print(recipeId)
         db.recipes.delete_one({"recipeId": recipeId})
-        return jsonify({"success": True, "message": "Deleted recipe with id " + id})
+        # return jsonify({"success": True, "message": "Deleted recipe with id " + id})
+        return jsonify({"success": True})
 
 
 # Home Routes

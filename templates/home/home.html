@@ -54,8 +54,11 @@
 
 
 
-    <h1 class="text-4xl font-semibold text-green-500 my-4">all recipes</h1>
+    <h1 class="text-4xl font-semibold text-green-500 my-4">Recipes</h1>
 
+    <input type="text" id="search"
+      class="w-full rounded-xl py-1.5 pl-4 text-gray-900 ring-2 ring-gray-300 focus:ring-green-500 focus:outline-none placeholder:text-gray-400"
+      placeholder="Search Recipe by Dish or Author" />
 
     <!-- recipe feed -->
     <div class="mt-6 mb-4 flex flex-col" id="recipes-feed">
@@ -105,38 +108,58 @@
       });
   }
 
-  fetch('/recipes')
-    .then(response => response.json())
-    .then(data => {
-      const container = document.getElementById('recipes-feed');
+  async function loadRecipes() {
 
-      // Iterate through each recipe and create a card
-      data.forEach(recipe => {
-        const card = document.createElement('div');
-        card.className = 'bg-gray-100 rounded-xl overflow-hidden p-5 mb-4 hover:cursor-pointer';
-        card.onclick = function () {
-          window.location.href = `/recipe?id=${recipe.recipeId}`;
-        }
+    // clear container
+    const container = document.getElementById('recipes-feed');
+    container.innerHTML = ''
 
-        const title = document.createElement('h3');
-        title.textContent = recipe.dishName;
-        title.className = 'text-xl font-bold';
+    // get search query
+    const searchQuery = document.getElementById('search').value;
 
-        const author = document.createElement('p');
-        author.textContent = `Cooked by ${recipe.author}`;
-        author.className = 'text-gray-900';
+    fetch('/recipes')
+      .then(response => response.json())
+      .then(data => {
 
-        const date = document.createElement('p');
-        date.textContent = `Added on ${recipe.date}`;
-        date.className = 'text-gray-600';
+        // Iterate through each recipe and create a card
+        data.forEach(recipe => {
+          if (recipe.dishName.includes(searchQuery) || recipe.author.includes(searchQuery)) {
 
-        card.appendChild(title);
-        card.appendChild(author);
-        card.appendChild(date);
+            const card = document.createElement('div');
+            card.className = 'bg-gray-100 rounded-xl overflow-hidden p-5 mb-4 hover:cursor-pointer';
+            card.onclick = function () {
+              window.location.href = `/recipe?id=${recipe.recipeId}`;
+            }
 
-        container.appendChild(card);
-      });
-    })
-    .catch(error => console.error('Error fetching recipes:', error));
-</script>
+            const title = document.createElement('h3');
+            title.textContent = recipe.dishName;
+            title.className = 'text-xl font-bold';
+
+            const author = document.createElement('p');
+            author.textContent = `Cooked by ${recipe.author}`;
+            author.className = 'text-gray-900';
+
+            const date = document.createElement('p');
+            date.textContent = `Added on ${recipe.date}`;
+            date.className = 'text-gray-600';
+
+            card.appendChild(title);
+            card.appendChild(author);
+            card.appendChild(date);
+
+            container.appendChild(card);
+          }
+        });
+      })
+      .catch(error => console.error('Error fetching recipes:', error));
+  }
+
+  // run on load
+  document.addEventListener("DOMContentLoaded", () => {
+    loadRecipes()
+  });
+
+  document.getElementById('search').addEventListener("input", (event) => {
+    loadRecipes()
+  });
 </script>
