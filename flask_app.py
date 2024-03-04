@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect
+import os
 import flask_login
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
@@ -12,10 +13,10 @@ from bson import json_util
 ###############################################
 # MONGO AND FLASK SETUP
 ###############################################
-load_dotenv()
+load_dotenv(override=True)
 
-uri = "mongodb+srv://admin:pass@cluster0.p7jcted.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-client = MongoClient(uri, server_api=ServerApi("1"), uuidRepresentation="standard")
+print(os.environ.get("MONGO_URI"))
+client = MongoClient(os.environ.get("MONGO_URI"), server_api=ServerApi("1"), uuidRepresentation="standard")
 db = client.flask_db
 # Send a ping to confirm a successful connection
 try:
@@ -29,7 +30,7 @@ app = Flask(__name__)
 ###############################################
 # FLASK LOGIN SETUP
 ###############################################
-app.secret_key = "secret key"  # required for flask login
+app.secret_key = os.environ.get("SECRET_KEY")  # required for flask login
 login_manager = flask_login.LoginManager()
 login_manager.session_protection = "strong"
 login_manager.init_app(app)
