@@ -52,9 +52,20 @@
 
     <h1 class="text-4xl font-semibold text-green-500 my-4">Recipes</h1>
 
-    <input type="text" id="search"
-      class="w-full rounded-xl py-1.5 pl-4 text-gray-900 ring-2 ring-gray-300 focus:ring-green-500 focus:outline-none placeholder:text-gray-400"
-      placeholder="Search Recipe by Dish or Author" />
+    <!-- search -->
+      <input type="text" id="search"
+        class="w-full rounded-xl py-1.5 pl-4 text-gray-900 ring-2 ring-gray-300 focus:ring-green-500 focus:outline-none placeholder:text-gray-400"
+        placeholder="Search Recipe by Dish or Author" />
+
+
+      <div
+        class="px-3 py-1.5 w-28 mt-4 mb-2 rounded-xl text-green-600 bg-green-100 flex flex-row space-x-2 hover:cursor-pointer hover:bg-green-200 font-medium"
+        onclick="filterSearch()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-green-600">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+        </svg>  
+        <h1>Search</h1>
+      </div>
 
     <!-- recipe feed -->
     <div class="mt-6 mb-4 flex flex-col" id="recipes-feed">
@@ -155,7 +166,7 @@
     loadRecipes()
   });
 
-  document.getElementById('search').addEventListener("input", (event) => {
+  function filterSearch() {
     loadRecipes()
-  });
+  }
 </script>

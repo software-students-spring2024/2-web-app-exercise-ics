@@ -1,0 +1,2 @@
+MONGO_URI="mongodb+srv://admin:pass@cluster0.p7jcted.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+SECRET_KEY="secret key"
