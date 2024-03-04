@@ -8,6 +8,8 @@ A little exercise to build a web application following an agile development proc
 
 See the Discord channel for Team-ICS to get the `.env` file. Place the file in the root directory.
 
+Note: Discord converts the `.env` file to a `env` file, so make sure you rename the downloaded file to `.env`.
+
 #### To run:
 
 Create a virtual environment, and/or install from `requirements.txt`.
