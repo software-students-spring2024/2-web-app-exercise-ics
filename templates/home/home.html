@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="{{url_for('static',filename='css/output.css')}}" rel="stylesheet" />
+  <title>Recipes</title>
+</head>
+
+<body>
+  <div class="container mx-auto mt-12 w-80 border-width-1 flex flex-col">
+    <!-- profile box -->
+    <div class="my-4 flex justify-between items-center">
+      <h1 class="text-md">
+        Logged in as <span class="font-semibold">{{ name }}</span>
+      </h1>
+
+      <button class="px-4 py-2 bg-green-100 hover:bg-green-200 duration-200 text-green-500 rounded-full font-medium"
+        onclick="handleLogout()">
+        Logout
+      </button>
+      <button class="px-4 py-2 bg-red-100 hover:bg-red-200 duration-200 text-red-500 rounded-full font-medium"
+        onclick="handleDelete()">
+        DELETE
+      </button>
+    </div>
+
+    <!-- actions box -->
+    <div class="my-4 flex flex-row space-x-2 items-center">
+      <!-- add new recipe -->
+      <div
+        class="px-3 py-1.5 rounded-xl text-green-600 bg-green-100 flex flex-row space-x-2 hover:cursor-pointer hover:bg-green-200 font-medium"
+        onclick="window.location.href='/addrecipe'">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="{1.5}"
+          stroke="currentColor" class="w-6 h-6 text-inherit">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <h1>Add Recipe</h1>
+      </div>
+
+      <!-- my recipes -->
+      <div
+        class="px-3 py-1.5 rounded-xl text-green-600 bg-green-100 flex flex-row space-x-2 hover:cursor-pointer hover:bg-green-200 font-medium items-center"
+        onclick="window.location.href='/myrecipes'">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+          class="w-5 h-5 text-green-600">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+        </svg>
+        <h1>My Recipes</h1>
+      </div>
+    </div>
+
+
+
+    <h1 class="text-4xl font-semibold text-green-500 my-4">all recipes</h1>
+
+
+    <!-- recipe feed -->
+    <div class="mt-6 mb-4 flex flex-col" id="recipes-feed">
+    </div>
+  </div>
+</body>
+
+</html>
+
+<script>
+  async function handleLogout() {
+    const response = await fetch("/logout", {
+      method: "GET",
+    });
+    const data = await response.json();
+    if (data.success) {
+      window.location.href = "/";
+    }
+  }
+
+  async function handleDelete() {
+    const response = await fetch("/delete", {
+      method: "GET",
+    });
+    const data = await response.json();
+    if (data.success) {
+      console.log(data)
+    }
+  }
+
+  async function getRecipes() {
+    fetch("/recipes")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data); // Here's your array of recipes
+      })
+      .catch((error) => {
+        console.error(
+          "There has been a problem with your fetch operation:",
+          error
+        );
+      });
+  }
+
+  fetch('/recipes')
+    .then(response => response.json())
+    .then(data => {
+      const container = document.getElementById('recipes-feed');
+
+      // Iterate through each recipe and create a card
+      data.forEach(recipe => {
+        const card = document.createElement('div');
+        card.className = 'bg-gray-100 rounded-xl overflow-hidden p-5 mb-4 hover:cursor-pointer';
+        card.onclick = function () {
+          window.location.href = `/recipe?id=${recipe.recipeId}`;
+        }
+
+        const title = document.createElement('h3');
+        title.textContent = recipe.dishName;
+        title.className = 'text-xl font-bold';
+
+        const author = document.createElement('p');
+        author.textContent = `Cooked by ${recipe.author}`;
+        author.className = 'text-gray-900';
+
+        const date = document.createElement('p');
+        date.textContent = `Added on ${recipe.date}`;
+        date.className = 'text-gray-600';
+
+        card.appendChild(title);
+        card.appendChild(author);
+        card.appendChild(date);
+
+        container.appendChild(card);
+      });
+    })
+    .catch(error => console.error('Error fetching recipes:', error));
+</script>
+</script>

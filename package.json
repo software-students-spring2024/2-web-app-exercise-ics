@@ -1,0 +1,14 @@
+{
+  "name": "2-web-app-exercise-ics",
+  "version": "1.0.0",
+  "description": "A little exercise to build a web application following an agile development process. See the [instructions](instructions.md) for more detail.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+}

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="{{url_for('static',filename='css/output.css')}}" rel="stylesheet" />
+    <title>My Recipes</title>
+</head>
+
+<body>
+    <div class="container mx-auto mt-12 w-80 border-width-1 flex flex-col">
+        <!-- profile box -->
+        <div class="my-4 flex justify-between items-center">
+            <h1 class="text-md">
+                Logged in as <span class="font-semibold">{{ name }}</span>
+            </h1>
+
+            <button
+                class="px-4 py-2 bg-green-100 hover:bg-green-200 duration-200 text-green-500 rounded-full font-medium"
+                onclick="handleLogout()">
+                Logout
+            </button>
+            <button class="px-4 py-2 bg-red-100 hover:bg-red-200 duration-200 text-red-500 rounded-full font-medium"
+                onclick="handleDelete()">
+                DELETE
+            </button>
+        </div>
+
+
+        <div class="flex flex-row space-x-2 my-4">
+            <button
+                class="px-4 py-1.5 pr-6 flex flex-row items-center bg-green-100 hover:bg-green-200 duration-200 text-green-500 rounded-xl font-medium"
+                onclick="window.location.href='/home'">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 mr-2 text-green-500">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
+
+                Home
+            </button>
+            <div class="px-3 py-1.5 pr-6 rounded-xl text-green-500 bg-green-100 flex flex-row space-x-2 hover:cursor-pointer hover:bg-green-200 font-medium"
+                onclick="window.location.href='/addrecipe'">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="{1.5}"
+                    stroke="currentColor" class="w-6 h-6 text-inherit">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                <h1>Add Recipe</h1>
+            </div>
+        </div>
+        <h1 class="text-4xl font-semibold text-green-500 my-4">my recipes</h1>
+
+
+        <!-- recipe feed -->
+        <div class="mb-4 flex flex-col" id="my-recipes-feed">
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script>
+    async function handleLogout() {
+        const response = await fetch("/logout", {
+            method: "GET",
+        });
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = "/";
+        }
+    }
+
+    fetch('/myrecipes', { method: "POST" })
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('my-recipes-feed');
+
+            // add empty list text
+            if (data.length == 0) {
+                const label = document.createElement('h1');
+                label.className = "text-gray-600 text-md"
+                label.textContent = "No recipes yet..."
+                container.appendChild(label)
+            }
+
+            console.log(data)
+
+            // create card for each recipe
+            data.forEach(recipe => {
+                const card = document.createElement('div');
+                card.className = 'bg-gray-100 rounded-xl overflow-hidden p-5 mb-4 hover:cursor-pointer';
+                card.onclick = function () {
+                    window.location.href = `/recipe?id=${recipe.recipeId}`;
+                }
+
+                const title = document.createElement('h3');
+                title.textContent = recipe.dishName;
+                title.className = 'text-xl font-bold';
+
+                const author = document.createElement('p');
+                author.textContent = `Cooked by ${recipe.author}`;
+                author.className = 'text-gray-900';
+
+                const date = document.createElement('p');
+                date.textContent = `Added on ${recipe.date}`;
+                date.className = 'text-gray-600';
+
+                card.appendChild(title);
+                card.appendChild(author);
+                card.appendChild(date);
+
+                container.appendChild(card);
+            });
+        })
+        .catch(error => console.error('Error fetching recipes:', error));
+</script>
+</script>

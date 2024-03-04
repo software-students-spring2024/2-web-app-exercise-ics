@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{url_for('static',filename='css/output.css')}}" rel="stylesheet">
+    <title>Recipes</title>
+</head>
+<body>
+    <div class="container mx-auto mt-12 w-80 border-width-1 flex flex-col">
+        <h1 class="text-4xl font-semibold text-green-500 hover:cursor-pointer" onclick="window.location.href='/'">recipes project title</h1>
+        <h1 class="text-md font-regular my-4">Dive into a treasure trove of tastes on our recipe-sharing site! Post your kitchen wins, check out recipes from fellow food lovers, and get ideas for your next delicious dish.</h1>
+
+
+        <!-- login signup container -->
+        <div class="mt-4">
+            <button class="px-4 py-1 bg-green-100 hover:bg-green-200 duration-200 hover:scale-105 text-green-500 transition ease-in-out rounded-full" onclick="window.location.href='/login'">login</button>
+            <button class="px-4 py-1 hover:bg-green-100 duration-200 text-green-500 rounded-full" onclick="window.location.href='/signup'">sign up</button>
+        </div>
+    </div>
+</body>
+</html>

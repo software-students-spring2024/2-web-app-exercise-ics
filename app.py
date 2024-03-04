@@ -1,4 +1,4 @@
-from flask import Flask, redirect, request
+from flask import Flask, redirect, request, render_template
 import flask_login
 from pymongo import MongoClient
 import os
@@ -10,14 +10,25 @@ from bson.objectid import ObjectId
 # MONGO AND FLASK SETUP
 ###############################################
 load_dotenv()
-login_manager = flask_login.LoginManager()
-
-client = MongoClient(os.environ.get("MONGO_URI"))
-db = client["testdb"]
-
-app = Flask(__name__)
+app = Flask("app")
 app.secret_key = os.environ.get("SECRET_KEY") # required for flask login
+
+login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
+
+password = "team-ics"
+uri = "mongodb+srv://team-ics:{password}@cluster0.p7jcted.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+client = MongoClient(uri)
+# Send a ping to confirm a successful connection
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
+
+print("hi!")
+
+db = client.flask_db
 
 ###############################################
 # FLASK LOGIN SETUP
@@ -48,19 +59,14 @@ def unauthorized_handler():
 ###############################################
 # ROUTES
 ###############################################
-@app.route("/")
-def hello():
-    return """
-    <p>Hello World!</p><br>
-    <a href='/recipetest'>View recipes</a><br>
-    <a href='/testform'>Test Form</a><br>
-    <a href='/login'>Login</a><br>
-    <a href='/signup'>Sign Up</a>
-    """
 
 # Hash passwords using bcrypt
 def hash_password(password):
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+@app.route("/")
+def hello_world():
+    return render_template("index.html")
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -200,3 +206,8 @@ def test_form():
         else:
             mongoid = "Failed to insert"
         return f"<p>Inserted: {mongoid}</p><br><a href='/recipetest'>View Recipes</a><br><a href='/profile'>Profile</a>"
+    
+
+# run app
+if(__name__ == "__main__"):
+    app.run(debug=True)
