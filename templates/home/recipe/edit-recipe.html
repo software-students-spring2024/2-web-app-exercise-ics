@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta id="context-data" doc="{{doc}}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="{{url_for('static',filename='css/output.css')}}"
+      rel="stylesheet"
+    />
+    <title>Recipes</title>
+  </head>
+  <body>
+    <div class="container mx-auto mt-12 w-80 border-width-1 flex flex-col">
+      <!-- profile box -->
+      <div class="my-4 flex justify-between items-center">
+        <h1 class="text-md">
+          Logged in as <span class="font-semibold">{{ name }}</span>
+        </h1>
+
+        <button
+          class="px-4 py-2 bg-green-100 hover:bg-green-200 duration-200 text-green-500 rounded-full font-medium"
+          onclick="handleLogout()"
+        >
+          Logout
+        </button>
+      </div>
+
+      <h1 class="text-4xl my-4 font-semibold text-green-500">edit recipe</h1>
+
+      <!-- dish name -->
+      <h1 class="font-size-md mt-4 mb-2 font-semibold">Name of Dish</h1>
+      <input
+        type="text"
+        id="dish-name"
+        class="w-full rounded-xl py-1.5 pl-4 text-gray-900 ring-2 ring-gray-300 focus:ring-green-500 focus:outline-none placeholder:text-gray-400"
+        placeholder="e.g. Apple Pie"
+      />
+
+      <!-- ingredients -->
+      <div class="max-w-lg mt-4 mb-2">
+        <h1 class="font-size-md mt-4 font-semibold">Ingredients</h1>
+        <div id="ingredients-list" class="space-y-2 my-2"></div>
+        <button
+          id="add-ingredient-button"
+          class="px-4 pr-6 py-2 items-center justify-center bg-green-100 hover:bg-green-200 duration-200 text-green-500 rounded-full font-medium flex flex-row"
+          onclick="createIngredientInput()"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="{1.5}"
+            stroke="currentColor"
+            class="w-6 h-6 text-green-500 mr-2"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4.5v15m7.5-7.5h-15"
+            />
+          </svg>
+          Add Ingredient
+        </button>
+      </div>
+
+      <!-- instructions -->
+      <div class="mt-4 mb-2">
+        <h1 class="font-size-md font-semibold mb-2">Instructions</h1>
+        <textarea
+          type="text"
+          id="instructions"
+          class="w-full rounded-xl py-1.5 pl-4 text-gray-900 ring-2 ring-gray-300 focus:ring-green-500 focus:outline-none placeholder:text-gray-400"
+          rows="4"
+          placeholder="e.g. First, wash your apples..."
+        ></textarea>
+      </div>
+
+      <!-- error text -->
+      <p id="error-text" class="text-md text-red-500 my-4 mb-2"></p>
+
+      <button
+        class="mt-6 px-4 pr-6 py-2 bg-green-100 hover:bg-green-200 duration-200 text-green-500 rounded-full font-medium flex flex-row justify-center items-center"
+        onclick="handleUpload()"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-4 h-4 text-inherit mr-2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m4.5 12.75 6 6 9-13.5"
+          />
+        </svg>
+        Update Recipe
+      </button>
+
+      <!-- cancel button -->
+      <button
+        class="mt-4 px-2 mx-auto duration-200 text-gray-400 rounded-full font-medium flex flex-row justify-center items-center"
+        onclick="window.location.href='/home'"
+      >
+        Cancel
+      </button>
+    </div>
+  </body>
+</html>
+
+<script>
+    // populate current params
+  const params = new URLSearchParams(window.location.search);
+  let data = document.getElementById("context-data").getAttribute("doc");
+  data = data.replaceAll('\'', '"');
+  data = JSON.parse(data);
+  var ingredients = data["ingredientsList"];
+  var dishName = data["dishName"];
+  var instructions = data["instructions"];
+  document.getElementById("dish-name").value = dishName;
+  document.getElementById("instructions").value = instructions;
+  
+  // populate ingredients
+  ingredients = ingredients.split(",");
+  ingredients.forEach((ingredient) => {
+      createIngredientInput(ingredient);
+  });
+
+  async function handleLogout() {
+    const response = await fetch("/logout", {
+      method: "GET",
+    });
+    const data = await response.json();
+    if (data.success) {
+      window.location.href = "/";
+    }
+  }
+
+  // Function to create a new ingredient input
+  function createIngredientInput(optionalName) {
+    const addButton = document.getElementById("add-ingredient-button");
+    const ingredientList = document.getElementById("ingredients-list");
+
+    const inputDiv = document.createElement("div");
+    inputDiv.classList.add("flex", "items-center", "space-x-2");
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Enter ingredient";
+    if (optionalName) {
+      input.value = optionalName;
+    }
+    input.classList.add(
+      "w-full",
+      "rounded-xl",
+      "py-1.5",
+      "px-4",
+      "text-gray-900",
+      "ring-2",
+      "ring-gray-300",
+      "focus:ring-green-500",
+      "focus:outline-none",
+      "placeholder:text-gray-400"
+    );
+
+    const deleteButton = document.createElement("button");
+    deleteButton.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-6 h-6 text-red-700"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>';
+    deleteButton.classList.add(
+      "px-2",
+      "py-2",
+      "bg-red-200",
+      "text-white",
+      "rounded-xl",
+      "hover:bg-red-300",
+      "duration-200",
+      "focus:outline-none"
+    );
+    // remove ingredient
+    deleteButton.onclick = function () {
+      inputDiv.remove();
+    };
+
+    // add to dom
+    inputDiv.appendChild(input);
+    inputDiv.appendChild(deleteButton);
+    ingredientList.appendChild(inputDiv);
+
+    console.log(getIngredientsList());
+  }
+
+  // get ingredients list and compile into an array
+  function getIngredientsList() {
+    const ingredientInputs = document.querySelectorAll(
+      "#ingredients-list input"
+    );
+    const ingredients = Array.from(ingredientInputs).map(
+      (input) => input.value
+    );
+    return ingredients.filter((ingredient) => ingredient.trim() !== ""); // remove empty inputs
+  }
+
+  // add one button initialy
+  document.addEventListener("DOMContentLoaded", function () {
+    createIngredientInput();
+  });
+
+  async function handleUpload() {
+    const dishName = document.getElementById("dish-name").value;
+    const instructions = document.getElementById("instructions").value;
+    const ingredientsList = getIngredientsList();
+    if (dishName == "" || instructions == "" || ingredientsList.length == 0) {
+      document.getElementById("error-text").textContent =
+        "Make sure to fill out the name of the dish, the instructions, and the ingredients. They are very important!";
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("id", params.get("id"));
+    formData.append("dishName", dishName);
+    formData.append("instructions", instructions);
+    formData.append("ingredientsList", ingredientsList);
+    const response = await fetch("/recipe/edit", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await response.json();
+    if (data.success) {
+      window.location.href = "/recipe/update-success";
+    } else {
+      document.getElementById("error-text").textContent =
+        "Login failed. Please confirm your credentials are correct.";
+    }
+  }
+</script>

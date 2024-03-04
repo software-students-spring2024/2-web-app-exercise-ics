@@ -194,6 +194,14 @@ def add_recipes_success():
         return redirect("/unathorized")
     return render_template("home/add-recipe/success.html")
 
+@app.route("/recipe/update-success", methods=["GET"])
+@flask_login.login_required
+def update_recipe_success():
+    name = flask_login.current_user.id
+    if name == None:
+        return redirect("/unathorized")
+    return render_template("home/recipe/update-success.html")
+
 
 @app.route("/recipes", methods=["GET"])
 @flask_login.login_required
@@ -232,6 +240,38 @@ def delete_recipe():
         # return jsonify({"success": True, "message": "Deleted recipe with id " + id})
         return jsonify({"success": True})
 
+@app.route("/recipe/edit", methods=["GET", "POST"])
+@flask_login.login_required
+def edit_recipe():
+    # redirect unauthorized if no user or user not original author
+    if request.method == "GET":
+        recipeId = request.args.get("id")
+    else:
+        recipeId = request.form.get("id")
+    foundRecipe = db.recipes.find_one({"recipeId": recipeId})
+    if foundRecipe["author"] != flask_login.current_user.id:
+        return redirect("/unathorized")
+    name = flask_login.current_user.id
+    if name == None:
+        return redirect("/unathorized")
+    
+    if request.method == "GET":
+        id = request.args.get("id")
+        originalRecipe = db.recipes.find_one({"recipeId": id})
+        doc = originalRecipe
+        print(doc)
+        return render_template("home/recipe/edit-recipe.html", doc=json.loads(json_util.dumps(doc)), name=name)
+    if request.method == "POST":
+        doc = {
+            "recipeId": recipeId,
+            "lastUpdated": str(date.today().strftime("%B %d, %Y")),
+            "author": flask_login.current_user.id,
+            "dishName": request.form.get("dishName"),
+            "ingredientsList": request.form.get("ingredientsList"),
+            "instructions": request.form.get("instructions"),
+        }
+        db.recipes.update_one({"recipeId": recipeId}, {"$set": doc})
+        return jsonify({"success": True, "message": "Updated entry"})
 
 # Home Routes
 @app.route("/home")
